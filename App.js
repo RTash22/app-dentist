@@ -1,12 +1,31 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { PacientsScreen } from './Screens/PacientsScreen';
+import { HomeScreen } from './Screens/HomeScreen';
+import { ConsultasScreen } from './Screens/ConsultasScreen';
+import { CalendarScreen } from './Screens/CalendarScreen';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { AppProvider } from './context/AppContext';
+
+const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <AppProvider>
+      <NavigationContainer >
+        <Stack.Navigator initialRouteName='Home' >
+          <Stack.Screen name='Home' component={HomeScreen} />
+          <Stack.Screen name='Patients' component={PacientsScreen} />
+          <Stack.Screen name='Consultas' component={ConsultasScreen} />
+          <Stack.Screen 
+            name='Calendar' 
+            component={CalendarScreen}
+            options={{ title: 'Calendario de Consultas' }}
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </AppProvider>
   );
 }
 
