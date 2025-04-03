@@ -22,8 +22,9 @@ export function HomeScreen({ navigation }) {
           <Text style={styles.buttonText}>Calendario</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.button}
-        onPress={() => navigation.navigate('Consultas')}>
+        <TouchableOpacity 
+        style={styles.button}
+        onPress={() => navigation.navigate('Consultas') }>
           <Ionicons name="medical" size={32} color="#f44336" />
           <Text style={styles.buttonText}>Citas</Text>
         </TouchableOpacity>

@@ -13,8 +13,8 @@ const Stack = createNativeStackNavigator();
 export default function App() {
   return (
     <AppProvider>
-      <NavigationContainer>
-        <Stack.Navigator initialRouteName='Home'>
+      <NavigationContainer >
+        <Stack.Navigator initialRouteName='Home' >
           <Stack.Screen name='Home' component={HomeScreen} />
           <Stack.Screen name='Patients' component={PacientsScreen} />
           <Stack.Screen name='Consultas' component={ConsultasScreen} />
