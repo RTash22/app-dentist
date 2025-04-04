@@ -7,6 +7,7 @@ import { ConsultasScreen } from './Screens/ConsultasScreen';
 import { CalendarScreen } from './Screens/CalendarScreen';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { AppProvider } from './context/AppContext';
+import { prin_cons } from './Screens/Citas/prin_cons';
 
 const Stack = createNativeStackNavigator();
 
@@ -17,11 +18,18 @@ export default function App() {
         <Stack.Navigator initialRouteName='Home' >
           <Stack.Screen name='Home' component={HomeScreen} />
           <Stack.Screen name='Patients' component={PacientsScreen} />
-          <Stack.Screen name='Consultas' component={ConsultasScreen} />
+          <Stack.Screen name='ConsultasScreen' component={ConsultasScreen} />
           <Stack.Screen 
             name='Calendar' 
             component={CalendarScreen}
             options={{ title: 'Calendario de Consultas' }}
+          />
+          <Stack.Screen 
+            name='Citas' 
+            component={prin_cons}
+            options={{ 
+              headerShown: false
+            }}
           />
         </Stack.Navigator>
       </NavigationContainer>
