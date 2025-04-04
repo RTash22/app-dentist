@@ -32,6 +32,8 @@ export function prin_cons() {
         </View>
       </ImageBackground>
 
+      <Text style={styles.mainTitle}>Citas</Text>
+
       {appointments.length > 0 ? (
         appointments.map((appointment) => (
           <View key={appointment.id} style={styles.appointmentCard}>
@@ -42,7 +44,7 @@ export function prin_cons() {
           </View>
         ))
       ) : (
-        <Text style={styles.noAppointments}>Citas</Text>
+        <Text style={styles.noAppointments}>No hay citas programadas</Text>
       )}
     </View>
   );
@@ -111,5 +113,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#666',
     marginTop: 20,
-  }
+  },
+  mainTitle: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#333',
+    textAlign: 'center',
+    marginVertical: 20,
+    letterSpacing: 1
+  },
 });
