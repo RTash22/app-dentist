@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, Modal, TextInput, Alert } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, Modal, TextInput, Alert, Platform, ScrollView, SafeAreaView, Dimensions, ActionSheetIOS, Keyboard } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useAppContext } from '../context/AppContext';
 
@@ -17,6 +17,7 @@ export function ConsultasScreen({ navigation }) {
     date: new Date(),
     description: '',
   });
+  const [mode, setMode] = useState('date');
 
   const formatDate = (date) => {
     return date.toLocaleDateString('es-ES');
@@ -75,23 +76,75 @@ export function ConsultasScreen({ navigation }) {
     });
   };
 
+  const showDatepicker = () => {
+    setMode('date');
+    setShowDatePicker(true);
+  };
+
+  const showTimepicker = () => {
+    setMode('time');
+    setShowTimePicker(true);
+  };
+
   const onDateChange = (event, selectedDate) => {
+    const currentDate = selectedDate || formData.date;
     setShowDatePicker(false);
+    setShowTimePicker(false);
+    
     if (selectedDate) {
-      const newDate = selectedDate;
-      newDate.setHours(formData.date.getHours());
-      newDate.setMinutes(formData.date.getMinutes());
-      setFormData({ ...formData, date: newDate });
+      if (mode === 'date') {
+        const newDate = new Date(currentDate);
+        newDate.setHours(formData.date.getHours());
+        newDate.setMinutes(formData.date.getMinutes());
+        setFormData(prev => ({ ...prev, date: newDate }));
+      } else {
+        const newDate = new Date(formData.date);
+        newDate.setHours(currentDate.getHours());
+        newDate.setMinutes(currentDate.getMinutes());
+        setFormData(prev => ({ ...prev, date: newDate }));
+      }
     }
   };
 
-  const onTimeChange = (event, selectedTime) => {
-    setShowTimePicker(false);
-    if (selectedTime) {
-      const newDate = new Date(formData.date);
-      newDate.setHours(selectedTime.getHours());
-      newDate.setMinutes(selectedTime.getMinutes());
-      setFormData({ ...formData, date: newDate });
+  const handleSelectPatient = () => {
+    if (Platform.OS === 'ios') {
+      const options = ['Cancelar', ...patients.map(p => p.name)];
+      ActionSheetIOS.showActionSheetWithOptions(
+        {
+          options,
+          cancelButtonIndex: 0,
+        },
+        (buttonIndex) => {
+          if (buttonIndex !== 0) { // Si no es cancelar
+            const selectedPatient = patients[buttonIndex - 1];
+            setFormData({
+              ...formData,
+              patientId: selectedPatient.id,
+              patientName: selectedPatient.name
+            });
+          }
+        }
+      );
+    } else {
+      setShowPatientPicker(true);
+    }
+  };
+
+  const handleDateTimeSelection = () => {
+    if (Platform.OS === 'ios') {
+      // Mostrar el DateTimePicker en modo spinner
+      setShowDatePicker(true);
+    } else {
+      showDatepicker();
+    }
+  };
+
+  const handleTimeSelection = () => {
+    if (Platform.OS === 'ios') {
+      // Mostrar el DateTimePicker en modo spinner para hora
+      setShowTimePicker(true);
+    } else {
+      showTimepicker();
     }
   };
 
@@ -142,112 +195,148 @@ export function ConsultasScreen({ navigation }) {
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
       >
-        <View style={styles.modalView}>
-          <Text style={styles.modalTitle}>
-            {editingAppointment ? 'Editar Consulta' : 'Nueva Consulta'}
-          </Text>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalTitle}>
+              {editingAppointment ? 'Editar Consulta' : 'Nueva Consulta'}
+            </Text>
 
-          <TouchableOpacity
-            style={styles.input}
-            onPress={() => setShowPatientPicker(true)}
-          >
-            <Text>{formData.patientName || 'Seleccionar Paciente'}</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.input}
-            onPress={() => setShowDatePicker(true)}
-          >
-            <Text>Fecha: {formatDate(formData.date)}</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.input}
-            onPress={() => setShowTimePicker(true)}
-          >
-            <Text>Hora: {formatTime(formData.date)}</Text>
-          </TouchableOpacity>
-
-          <TextInput
-            style={[styles.input, styles.textArea]}
-            placeholder="Descripción de la consulta"
-            value={formData.description}
-            onChangeText={(text) => setFormData({...formData, description: text})}
-            multiline={true}
-            numberOfLines={4}
-          />
-
-          <View style={styles.modalButtons}>
             <TouchableOpacity
-              style={[styles.modalButton, styles.cancelButton]}
-              onPress={() => setModalVisible(false)}
+              style={[styles.input, { backgroundColor: '#fff' }]}
+              onPress={handleSelectPatient}
             >
-              <Text style={styles.buttonText}>Cancelar</Text>
+              <Text>{formData.patientName || 'Seleccionar Paciente'}</Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity
-              style={[styles.modalButton, styles.saveButton]}
-              onPress={handleSubmit}
+              style={styles.input}
+              onPress={showDatepicker}
             >
-              <Text style={styles.buttonText}>Guardar</Text>
+              <Text>Fecha: {formatDate(formData.date)}</Text>
             </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.input}
+              onPress={showTimepicker}
+            >
+              <Text>Hora: {formatTime(formData.date)}</Text>
+            </TouchableOpacity>
+
+            <TextInput
+              style={[styles.input, styles.textArea]}
+              placeholder="Descripción de la consulta"
+              value={formData.description}
+              onChangeText={(text) => setFormData({...formData, description: text})}
+              multiline={true}
+              numberOfLines={4}
+              returnKeyType="done"
+              blurOnSubmit={true}
+              onSubmitEditing={() => Keyboard.dismiss()}
+            />
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={() => setModalVisible(false)}
+              >
+                <Text style={styles.buttonText}>Cancelar</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={[styles.modalButton, styles.saveButton]}
+                onPress={handleSubmit}
+              >
+                <Text style={styles.buttonText}>Guardar</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Date/Time Picker */}
+            {(showDatePicker || showTimePicker) && (
+              <View style={styles.datePickerOverlay}>
+                <View style={styles.dateTimePickerWrapper}>
+                  <View style={styles.pickerHeaderContainer}>
+                    <TouchableOpacity 
+                      onPress={() => {
+                        setShowDatePicker(false);
+                        setShowTimePicker(false);
+                      }}
+                      style={styles.pickerHeaderButton}
+                    >
+                      <Text style={styles.pickerHeaderButtonText}>Cancelar</Text>
+                    </TouchableOpacity>
+                    <Text style={styles.pickerTitle}>
+                      {mode === 'date' ? 'Seleccionar Fecha' : 'Seleccionar Hora'}
+                    </Text>
+                    <TouchableOpacity 
+                      onPress={() => {
+                        onDateChange({ type: 'set' }, formData.date);
+                      }}
+                      style={styles.pickerHeaderButton}
+                    >
+                      <Text style={styles.pickerHeaderButtonText}>Aceptar</Text>
+                    </TouchableOpacity>
+                  </View>
+                  <View style={styles.datePickerContainer}>
+                    <DateTimePicker
+                      value={formData.date}
+                      mode={mode}
+                      is24Hour={true}
+                      onChange={onDateChange}
+                      display="spinner"
+                      themeVariant="light"
+                      textColor="black"
+                      style={{
+                        width: Platform.OS === 'ios' ? 320 : '100%',
+                        height: 300,
+                      }}
+                    />
+                  </View>
+                </View>
+              </View>
+            )}
           </View>
         </View>
       </Modal>
 
-      {showDatePicker && (
-        <DateTimePicker
-          value={formData.date}
-          mode="date"
-          display="default"
-          onChange={onDateChange}
-        />
-      )}
-
-      {showTimePicker && (
-        <DateTimePicker
-          value={formData.date}
-          mode="time"
-          display="default"
-          onChange={onTimeChange}
-        />
-      )}
-
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={showPatientPicker}
-        onRequestClose={() => setShowPatientPicker(false)}
-      >
-        <View style={styles.modalView}>
-          <Text style={styles.modalTitle}>Seleccionar Paciente</Text>
-          <FlatList
-            data={patients}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
+      {/* Solo mostrar el modal de pacientes en Android */}
+      {Platform.OS === 'android' && (
+        <Modal
+          visible={showPatientPicker}
+          animationType="slide"
+          transparent={true}
+          onRequestClose={() => setShowPatientPicker(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalView}>
+              <Text style={styles.modalTitle}>Seleccionar Paciente</Text>
+              <ScrollView>
+                {patients.map((item) => (
+                  <TouchableOpacity
+                    key={item.id}
+                    style={styles.pickerItem}
+                    onPress={() => {
+                      setFormData({
+                        ...formData,
+                        patientId: item.id,
+                        patientName: item.name
+                      });
+                      setShowPatientPicker(false);
+                    }}
+                  >
+                    <Text style={styles.pickerItemText}>{item.name}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
               <TouchableOpacity
-                style={styles.patientItem}
-                onPress={() => {
-                  setFormData({
-                    ...formData,
-                    patientId: item.id,
-                    patientName: item.name
-                  });
-                  setShowPatientPicker(false);
-                }}
+                style={[styles.modalButton, styles.cancelButton, { marginTop: 10 }]}
+                onPress={() => setShowPatientPicker(false)}
               >
-                <Text>{item.name}</Text>
+                <Text style={styles.buttonText}>Cancelar</Text>
               </TouchableOpacity>
-            )}
-          />
-          <TouchableOpacity
-            style={[styles.modalButton, styles.cancelButton]}
-            onPress={() => setShowPatientPicker(false)}
-          >
-            <Text style={styles.buttonText}>Cancelar</Text>
-          </TouchableOpacity>
-        </View>
-      </Modal>
+            </View>
+          </View>
+        </Modal>
+      )}
     </View>
   );
 }
@@ -305,13 +394,26 @@ const styles = StyleSheet.create({
     color: 'white',
     textAlign: 'center',
   },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   modalView: {
-    margin: 20,
+    width: Platform.OS === 'ios' ? '90%' : '90%',
     backgroundColor: 'white',
     borderRadius: 20,
-    padding: 35,
+    padding: 20,
+    alignItems: 'stretch',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
     elevation: 5,
-    marginTop: 100,
   },
   modalTitle: {
     fontSize: 20,
@@ -347,9 +449,240 @@ const styles = StyleSheet.create({
   cancelButton: {
     backgroundColor: '#f44336',
   },
+  patientPickerModal: {
+    width: Platform.OS === 'ios' ? '90%' : '90%',
+    maxHeight: '80%',
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 20,
+    alignItems: 'stretch',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  closeButton: {
+    padding: 10,
+  },
+  closeButtonText: {
+    fontSize: 24,
+    color: '#666',
+    fontWeight: 'bold',
+  },
+  patientsList: {
+    maxHeight: Platform.OS === 'ios' ? '70%' : '70%',
+  },
   patientItem: {
     padding: 15,
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
+    backgroundColor: 'white',
+  },
+  patientItemText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  iosDatePicker: {
+    backgroundColor: 'white',
+    width: '100%',
+  },
+  iosPickerContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'white',
+    borderTopWidth: 1,
+    borderTopColor: '#e0e0e0',
+  },
+  iosPickerHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#f8f8f8',
+  },
+  iosPickerButton: {
+    color: '#007AFF',
+    fontSize: 17,
+  },
+  iosModalTitle: {
+    fontSize: 17,
+    fontWeight: '600',
+  },
+  iosDatePicker: {
+    height: 200,
+    backgroundColor: 'white',
+  },
+  iosModalContainer: {
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  iosModalContent: {
+    backgroundColor: 'white',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    height: Dimensions.get('window').height * 0.7,
+  },
+  iosModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  iosModalTitle: {
+    fontSize: 17,
+    fontWeight: '600',
+  },
+  iosModalButton: {
+    color: '#007AFF',
+    fontSize: 17,
+  },
+  iosPatientsList: {
+    flex: 1,
+  },
+  iosPatientItem: {
+    padding: 16,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#e0e0e0',
+    backgroundColor: 'white',
+  },
+  iosPatientItemText: {
+    fontSize: 17,
+    color: '#000',
+  },
+  pickerItem: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+    backgroundColor: 'white',
+  },
+  pickerItemText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  iosModalOverlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+  },
+  iosDateTimePickerContainer: {
+    backgroundColor: 'white',
+    borderTopLeftRadius: 15,
+    borderTopRightRadius: 15,
+    paddingBottom: Platform.OS === 'ios' ? 40 : 0,
+  },
+  iosPickerHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  iosPickerTitle: {
+    fontSize: 17,
+    fontWeight: '600',
+  },
+  iosPickerButton: {
+    color: '#007AFF',
+    fontSize: 17,
+  },
+  iosDateTimePicker: {
+    height: 200,
+    width: '100%',
+  },
+  datePickerContainer: {
+    backgroundColor: 'white',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    borderTopWidth: 1,
+    borderTopColor: '#e0e0e0',
+  },
+  dateTimePickerContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    zIndex: 9999,
+    elevation: 9999,
+  },
+  dateTimePickerWrapper: {
+    backgroundColor: 'white',
+    borderTopLeftRadius: 15,
+    borderTopRightRadius: 15,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: -2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  datePickerOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    top: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+    zIndex: 1000,
+  },
+  dateTimePickerWrapper: {
+    backgroundColor: 'white',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    overflow: 'hidden',
+  },
+  pickerHeaderContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    backgroundColor: '#f8f8f8',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  pickerHeaderButton: {
+    padding: 5,
+  },
+  pickerHeaderButtonText: {
+    color: '#007AFF',
+    fontSize: 17,
+    fontWeight: '600',
+  },
+  pickerTitle: {
+    fontSize: 17,
+    fontWeight: '600',
+    color: '#000',
+  },
+  datePickerContainer: {
+    paddingVertical: 20,
+    backgroundColor: 'white',
+    alignItems: 'center',
+    minHeight: 300,
+  },
+  datePicker: {
+    width: Platform.OS === 'ios' ? 320 : '100%',
+    height: 200,
   },
 });

@@ -2,8 +2,30 @@ import React, { createContext, useState, useContext } from 'react';
 
 const AppContext = createContext();
 
+// Pacientes de ejemplo
+const initialPatients = [
+  {
+    id: '1',
+    name: 'Juan Pérez',
+    age: '35',
+    phone: '555-0101'
+  },
+  {
+    id: '2',
+    name: 'María García',
+    age: '28',
+    phone: '555-0102'
+  },
+  {
+    id: '3',
+    name: 'Carlos López',
+    age: '42',
+    phone: '555-0103'
+  }
+];
+
 export function AppProvider({ children }) {
-  const [patients, setPatients] = useState([]);
+  const [patients, setPatients] = useState(initialPatients);
   const [appointments, setAppointments] = useState([]);
 
   const addPatient = (patient) => {
