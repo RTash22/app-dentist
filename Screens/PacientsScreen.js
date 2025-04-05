@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Modal, TextInput, Alert } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useAppContext } from '../context/AppContext';
 
 export function PacientsScreen({ navigation }) {
@@ -52,41 +53,39 @@ export function PacientsScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity 
-        style={styles.addButton}
-        onPress={() => {
-          setFormData({ id: '', name: '', age: '', phone: '' });
-          setEditingPatient(null);
-          setModalVisible(true);
-        }}
-      >
-        <Text style={styles.addButtonText}>Añadir Paciente</Text>
-      </TouchableOpacity>
+      <TextInput 
+        style={styles.searchBar} 
+        placeholder="Buscar" 
+        placeholderTextColor="#aaa" 
+      />
 
       <FlatList
         data={patients}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <View style={styles.patientCard}>
-            <View style={styles.patientInfo}>
-              <Text style={styles.patientName}>{item.name}</Text>
-              <Text>Edad: {item.age}</Text>
-              <Text>Teléfono: {item.phone}</Text>
+            <View style={styles.imageContainer}>
+              <View style={styles.imagePlaceholder}>
+                <Ionicons name="person" size={40} color="#cccccc" />
+              </View>
             </View>
-            <View style={styles.actionButtons}>
-              <TouchableOpacity 
-                style={[styles.actionButton, styles.editButton]}
-                onPress={() => handleEdit(item)}
-              >
-                <Text style={styles.buttonText}>Editar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={[styles.actionButton, styles.deleteButton]}
-                onPress={() => handleDelete(item.id)}
-              >
-                <Text style={styles.buttonText}>Eliminar</Text>
-              </TouchableOpacity>
-            </View>
+            <TouchableOpacity 
+              style={styles.patientButton}
+              onPress={() => {
+                navigation.navigate('PatientDetails', {
+                  patientId: item.id
+                });
+              }}
+            >
+              <Text style={styles.patientText}>{item.name}</Text>
+              <Text style={styles.patientDetails}>Edad: {item.age} | Tel: {item.phone}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.deleteButton}
+              onPress={() => handleDelete(item.id)}
+            >
+              <Ionicons name="trash-outline" size={24} color="white" />
+            </TouchableOpacity>
           </View>
         )}
       />
@@ -97,51 +96,68 @@ export function PacientsScreen({ navigation }) {
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
       >
-        <View style={styles.modalView}>
-          <Text style={styles.modalTitle}>
-            {editingPatient ? 'Editar Paciente' : 'Nuevo Paciente'}
-          </Text>
-          
-          <TextInput
-            style={styles.input}
-            placeholder="Nombre"
-            value={formData.name}
-            onChangeText={(text) => setFormData({...formData, name: text})}
-          />
-          
-          <TextInput
-            style={styles.input}
-            placeholder="Edad"
-            value={formData.age}
-            keyboardType="numeric"
-            onChangeText={(text) => setFormData({...formData, age: text})}
-          />
-          
-          <TextInput
-            style={styles.input}
-            placeholder="Teléfono"
-            value={formData.phone}
-            keyboardType="phone-pad"
-            onChangeText={(text) => setFormData({...formData, phone: text})}
-          />
+        <View style={styles.modalContainer}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalTitle}>
+              {editingPatient ? 'Editar Paciente' : 'Nuevo Paciente'}
+            </Text>
 
-          <View style={styles.modalButtons}>
-            <TouchableOpacity
-              style={[styles.modalButton, styles.cancelButton]}
-              onPress={() => setModalVisible(false)}
-            >
-              <Text style={styles.buttonText}>Cancelar</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity
-              style={[styles.modalButton, styles.saveButton]}
-              onPress={handleSubmit}
-            >
-              <Text style={styles.buttonText}>Guardar</Text>
-            </TouchableOpacity>
+            <TextInput
+              style={styles.input}
+              placeholder="Nombre"
+              value={formData.name}
+              onChangeText={(text) => setFormData({...formData, name: text})}
+            />
+
+            <TextInput
+              style={styles.input}
+              placeholder="Edad"
+              value={formData.age}
+              keyboardType="numeric"
+              onChangeText={(text) => setFormData({...formData, age: text})}
+            />
+
+            <TextInput
+              style={styles.input}
+              placeholder="Teléfono"
+              value={formData.phone}
+              keyboardType="phone-pad"
+              onChangeText={(text) => setFormData({...formData, phone: text})}
+            />
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={() => {
+                  setModalVisible(false);
+                  setEditingPatient(null);
+                  setFormData({ id: '', name: '', age: '', phone: '' });
+                }}
+              >
+                <Text style={styles.buttonText}>Cancelar</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={[styles.modalButton, styles.saveButton]}
+                onPress={handleSubmit}
+              >
+                <Text style={styles.buttonText}>Guardar</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
+
+      <TouchableOpacity 
+        style={styles.fab} 
+        onPress={() => {
+          setEditingPatient(null);
+          setFormData({ id: '', name: '', age: '', phone: '' });
+          setModalVisible(true);
+        }}
+      >
+        <Ionicons name="add" size={24} color="white" />
+      </TouchableOpacity>
     </View>
   );
 }
@@ -149,91 +165,122 @@ export function PacientsScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#fff',
     padding: 16,
-    backgroundColor: '#f5f5f5',
   },
-  addButton: {
-    backgroundColor: '#2196F3',
-    padding: 15,
+  searchBar: {
+    backgroundColor: '#ddd',
     borderRadius: 8,
+    padding: 10,
     marginBottom: 16,
+    color: '#000',
   },
-  addButtonText: {
+  patientCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+    backgroundColor: '#0D4D8D',
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  imageContainer: {
+    padding: 10,
+  },
+  imagePlaceholder: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 10,
+  },
+  patientButton: {
+    flex: 1,
+    padding: 15,
+    justifyContent: 'center',
+  },
+  patientText: {
     color: 'white',
-    textAlign: 'center',
     fontSize: 16,
     fontWeight: 'bold',
   },
-  patientCard: {
-    backgroundColor: 'white',
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 12,
-    elevation: 2,
-  },
-  patientInfo: {
-    marginBottom: 10,
-  },
-  patientName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 4,
-  },
-  actionButtons: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-  },
-  actionButton: {
-    padding: 8,
-    borderRadius: 4,
-    marginLeft: 8,
-    minWidth: 80,
-  },
-  editButton: {
-    backgroundColor: '#4CAF50',
+  patientDetails: {
+    color: '#e0e0e0',
+    fontSize: 14,
+    marginTop: 4,
   },
   deleteButton: {
-    backgroundColor: '#f44336',
+    backgroundColor: '#D40D0D',
+    padding: 10,
+    borderRadius: 8,
+    marginLeft: 10,
+    marginRight: 10,
   },
-  buttonText: {
-    color: 'white',
-    textAlign: 'center',
+  fab: {
+    position: 'absolute',
+    right: 20,
+    bottom: 20,
+    backgroundColor: '#0D95D4',
+    padding: 16,
+    borderRadius: 50,
+    elevation: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalView: {
-    margin: 20,
+    width: '80%',
     backgroundColor: 'white',
-    borderRadius: 20,
-    padding: 35,
-    elevation: 5,
-    marginTop: 100,
+    borderRadius: 8,
+    padding: 20,
+    alignItems: 'center',
   },
   modalTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 20,
-    textAlign: 'center',
   },
   input: {
-    height: 40,
-    borderWidth: 1,
-    borderColor: '#ddd',
+    width: '100%',
+    backgroundColor: '#ddd',
     borderRadius: 8,
     padding: 10,
-    marginBottom: 16,
+    marginBottom: 10,
+    color: '#000',
   },
   modalButtons: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    marginTop: 20,
   },
   modalButton: {
+    flex: 1,
     padding: 10,
     borderRadius: 8,
-    minWidth: 100,
-  },
-  saveButton: {
-    backgroundColor: '#4CAF50',
+    alignItems: 'center',
   },
   cancelButton: {
-    backgroundColor: '#f44336',
+    backgroundColor: '#D40D0D',
+    marginRight: 10,
+  },
+  saveButton: {
+    backgroundColor: '#0D95D4',
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });

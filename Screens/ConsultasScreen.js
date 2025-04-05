@@ -33,6 +33,13 @@ export function ConsultasScreen({ navigation }) {
       return;
     }
 
+    // Validar que la fecha no sea pasada
+    const now = new Date();
+    if (formData.date < now) {
+      Alert.alert('Error', 'No se pueden agendar consultas en fechas pasadas');
+      return;
+    }
+
     if (editingAppointment) {
       updateAppointment({ ...formData, id: editingAppointment.id });
     } else {
@@ -301,19 +308,21 @@ export function ConsultasScreen({ navigation }) {
       {/* Solo mostrar el modal de pacientes en Android */}
       {Platform.OS === 'android' && (
         <Modal
-          visible={showPatientPicker}
           animationType="slide"
           transparent={true}
+          visible={showPatientPicker}
           onRequestClose={() => setShowPatientPicker(false)}
         >
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalView}>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
               <Text style={styles.modalTitle}>Seleccionar Paciente</Text>
-              <ScrollView>
-                {patients.map((item) => (
+              <FlatList
+                style={styles.patientsList}
+                data={patients}
+                keyExtractor={(item) => item.id}
+                renderItem={({ item }) => (
                   <TouchableOpacity
-                    key={item.id}
-                    style={styles.pickerItem}
+                    style={styles.patientItem}
                     onPress={() => {
                       setFormData({
                         ...formData,
@@ -323,12 +332,12 @@ export function ConsultasScreen({ navigation }) {
                       setShowPatientPicker(false);
                     }}
                   >
-                    <Text style={styles.pickerItemText}>{item.name}</Text>
+                    <Text style={styles.patientItemText}>{item.name}</Text>
                   </TouchableOpacity>
-                ))}
-              </ScrollView>
+                )}
+              />
               <TouchableOpacity
-                style={[styles.modalButton, styles.cancelButton, { marginTop: 10 }]}
+                style={[styles.modalButton, styles.cancelButton]}
                 onPress={() => setShowPatientPicker(false)}
               >
                 <Text style={styles.buttonText}>Cancelar</Text>
@@ -480,17 +489,17 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   patientsList: {
-    maxHeight: Platform.OS === 'ios' ? '70%' : '70%',
+    width: '100%',
+    maxHeight: '70%',
   },
   patientItem: {
     padding: 15,
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
-    backgroundColor: 'white',
+    width: '100%',
   },
   patientItemText: {
     fontSize: 16,
-    color: '#333',
   },
   iosDatePicker: {
     backgroundColor: 'white',
@@ -684,5 +693,27 @@ const styles = StyleSheet.create({
   datePicker: {
     width: Platform.OS === 'ios' ? 320 : '100%',
     height: 200,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    width: '90%',
+    maxHeight: '80%',
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 20,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
   },
 });
