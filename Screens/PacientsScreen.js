@@ -1,18 +1,83 @@
-import React, { useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, Modal, TextInput, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { 
+  View, 
+  Text, 
+  FlatList, 
+  TouchableOpacity, 
+  StyleSheet, 
+  Modal, 
+  TextInput, 
+  Alert, 
+  Image,
+  Keyboard,
+  TouchableWithoutFeedback,
+  KeyboardAvoidingView,
+  Platform 
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import { useAppContext } from '../context/AppContext';
 
 export function PacientsScreen({ navigation }) {
   const { patients, addPatient, updatePatient, deletePatient } = useAppContext();
   const [modalVisible, setModalVisible] = useState(false);
   const [editingPatient, setEditingPatient] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const [formData, setFormData] = useState({
     id: '',
     name: '',
     age: '',
     phone: '',
+    imageUri: null,
   });
+
+  useEffect(() => {
+    (async () => {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permiso requerido', 'Se necesita acceso a la galería para cambiar la foto');
+      }
+    })();
+  }, []);
+
+  const formatPhoneNumber = (text) => {
+    const cleaned = text.replace(/\D/g, '');
+    if (cleaned.length === 0) return '';
+    if (cleaned.length <= 3) {
+      return cleaned;
+    } else if (cleaned.length <= 6) {
+      return `${cleaned.slice(0, 3)}-${cleaned.slice(3)}`;
+    } else {
+      return `${cleaned.slice(0, 3)}-${cleaned.slice(3, 6)}-${cleaned.slice(6, 10)}`;
+    }
+  };
+
+  const handlePhoneChange = (text) => {
+    const numericText = text.replace(/\D/g, '');
+    const formatted = formatPhoneNumber(numericText);
+    setFormData({...formData, phone: formatted});
+  };
+
+  const pickImage = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.5,
+      });
+
+      if (!result.canceled) {
+        setFormData({ ...formData, imageUri: result.assets[0].uri });
+      }
+    } catch (error) {
+      Alert.alert('Error', 'No se pudo seleccionar la imagen');
+    }
+  };
+
+  const filteredPatients = patients.filter(patient =>
+    patient.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const handleSubmit = () => {
     if (!formData.name || !formData.age || !formData.phone) {
@@ -28,7 +93,7 @@ export function PacientsScreen({ navigation }) {
 
     setModalVisible(false);
     setEditingPatient(null);
-    setFormData({ id: '', name: '', age: '', phone: '' });
+    setFormData({ id: '', name: '', age: '', phone: '', imageUri: null });
   };
 
   const handleDelete = (id) => {
@@ -55,19 +120,28 @@ export function PacientsScreen({ navigation }) {
     <View style={styles.container}>
       <TextInput 
         style={styles.searchBar} 
-        placeholder="Buscar" 
-        placeholderTextColor="#aaa" 
+        placeholder="Buscar paciente" 
+        placeholderTextColor="#aaa"
+        value={searchQuery}
+        onChangeText={setSearchQuery}
       />
 
       <FlatList
-        data={patients}
+        data={filteredPatients}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <View style={styles.patientCard}>
             <View style={styles.imageContainer}>
-              <View style={styles.imagePlaceholder}>
-                <Ionicons name="person" size={40} color="#cccccc" />
-              </View>
+              {item.imageUri ? (
+                <Image 
+                  source={{ uri: item.imageUri }} 
+                  style={styles.imagePlaceholder}
+                />
+              ) : (
+                <View style={styles.imagePlaceholder}>
+                  <Ionicons name="person" size={40} color="#cccccc" />
+                </View>
+              )}
             </View>
             <TouchableOpacity 
               style={styles.patientButton}
@@ -80,12 +154,6 @@ export function PacientsScreen({ navigation }) {
               <Text style={styles.patientText}>{item.name}</Text>
               <Text style={styles.patientDetails}>Edad: {item.age} | Tel: {item.phone}</Text>
             </TouchableOpacity>
-            <TouchableOpacity 
-              style={styles.deleteButton}
-              onPress={() => handleDelete(item.id)}
-            >
-              <Ionicons name="trash-outline" size={24} color="white" />
-            </TouchableOpacity>
           </View>
         )}
       />
@@ -96,63 +164,94 @@ export function PacientsScreen({ navigation }) {
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
       >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalView}>
-            <Text style={styles.modalTitle}>
-              {editingPatient ? 'Editar Paciente' : 'Nuevo Paciente'}
-            </Text>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <KeyboardAvoidingView 
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            style={styles.modalContainer}
+          >
+            <View style={styles.modalView}>
+              <Text style={styles.modalTitle}>
+                {editingPatient ? 'Editar Paciente' : 'Nuevo Paciente'}
+              </Text>
 
-            <TextInput
-              style={styles.input}
-              placeholder="Nombre"
-              value={formData.name}
-              onChangeText={(text) => setFormData({...formData, name: text})}
-            />
-
-            <TextInput
-              style={styles.input}
-              placeholder="Edad"
-              value={formData.age}
-              keyboardType="numeric"
-              onChangeText={(text) => setFormData({...formData, age: text})}
-            />
-
-            <TextInput
-              style={styles.input}
-              placeholder="Teléfono"
-              value={formData.phone}
-              keyboardType="phone-pad"
-              onChangeText={(text) => setFormData({...formData, phone: text})}
-            />
-
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={[styles.modalButton, styles.cancelButton]}
-                onPress={() => {
-                  setModalVisible(false);
-                  setEditingPatient(null);
-                  setFormData({ id: '', name: '', age: '', phone: '' });
-                }}
+              <TouchableOpacity 
+                style={styles.modalImageContainer}
+                onPress={pickImage}
               >
-                <Text style={styles.buttonText}>Cancelar</Text>
+                {formData.imageUri ? (
+                  <Image 
+                    source={{ uri: formData.imageUri }} 
+                    style={styles.modalImage}
+                  />
+                ) : (
+                  <View style={styles.modalImagePlaceholder}>
+                    <Ionicons name="camera" size={40} color="#999" />
+                    <Text style={styles.modalImageText}>Agregar foto</Text>
+                  </View>
+                )}
               </TouchableOpacity>
-              
-              <TouchableOpacity
-                style={[styles.modalButton, styles.saveButton]}
-                onPress={handleSubmit}
-              >
-                <Text style={styles.buttonText}>Guardar</Text>
-              </TouchableOpacity>
+
+              <TextInput
+                style={styles.input}
+                placeholder="Nombre"
+                value={formData.name}
+                onChangeText={(text) => setFormData({...formData, name: text})}
+                returnKeyType="next"
+              />
+
+              <TextInput
+                style={styles.input}
+                placeholder="Edad"
+                value={formData.age}
+                keyboardType="numeric"
+                onChangeText={(text) => setFormData({...formData, age: text})}
+                returnKeyType="next"
+              />
+
+              <TextInput
+                style={styles.input}
+                placeholder="Teléfono"
+                value={formData.phone}
+                keyboardType="number-pad"
+                onChangeText={handlePhoneChange}
+                maxLength={12}
+                returnKeyType="done"
+                onSubmitEditing={Keyboard.dismiss}
+              />
+
+              <View style={styles.modalButtons}>
+                <TouchableOpacity
+                  style={[styles.modalButton, styles.cancelButton]}
+                  onPress={() => {
+                    Keyboard.dismiss();
+                    setModalVisible(false);
+                    setEditingPatient(null);
+                    setFormData({ id: '', name: '', age: '', phone: '', imageUri: null });
+                  }}
+                >
+                  <Text style={styles.buttonText}>Cancelar</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity
+                  style={[styles.modalButton, styles.saveButton]}
+                  onPress={() => {
+                    Keyboard.dismiss();
+                    handleSubmit();
+                  }}
+                >
+                  <Text style={styles.buttonText}>Guardar</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
-        </View>
+          </KeyboardAvoidingView>
+        </TouchableWithoutFeedback>
       </Modal>
 
       <TouchableOpacity 
         style={styles.fab} 
         onPress={() => {
           setEditingPatient(null);
-          setFormData({ id: '', name: '', age: '', phone: '' });
+          setFormData({ id: '', name: '', age: '', phone: '', imageUri: null });
           setModalVisible(true);
         }}
       >
@@ -217,13 +316,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginTop: 4,
   },
-  deleteButton: {
-    backgroundColor: '#D40D0D',
-    padding: 10,
-    borderRadius: 8,
-    marginLeft: 10,
-    marginRight: 10,
-  },
   fab: {
     position: 'absolute',
     right: 20,
@@ -247,11 +339,37 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 20,
     alignItems: 'center',
+    maxHeight: '80%',
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 20,
+  },
+  modalImageContainer: {
+    marginBottom: 20,
+    alignItems: 'center',
+  },
+  modalImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+  },
+  modalImagePlaceholder: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: '#f0f0f0',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderStyle: 'dashed',
+  },
+  modalImageText: {
+    marginTop: 5,
+    color: '#999',
+    fontSize: 14,
   },
   input: {
     width: '100%',

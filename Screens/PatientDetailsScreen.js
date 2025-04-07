@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAppContext } from '../context/AppContext';
 
@@ -21,14 +21,29 @@ export function PatientDetailsScreen({ route, navigation }) {
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <View style={styles.imageContainer}>
-          <View style={styles.imagePlaceholder}>
-            <Ionicons name="person" size={60} color="#ffffff" />
-          </View>
+          {patient.imageUri ? (
+            <Image 
+              source={{ uri: patient.imageUri }} 
+              style={styles.imagePlaceholder}
+            />
+          ) : (
+            <View style={styles.imagePlaceholder}>
+              <Ionicons name="person" size={60} color="#ffffff" />
+            </View>
+          )}
         </View>
         <Text style={styles.name}>{patient.name}</Text>
       </View>
 
       <View style={styles.infoSection}>
+        <TouchableOpacity 
+          style={styles.editButton}
+          onPress={() => navigation.replace('EditPatient', { patientId: patient.id })}
+        >
+          <Ionicons name="pencil" size={24} color="white" />
+          <Text style={styles.editButtonText}>Editar</Text>
+        </TouchableOpacity>
+
         <View style={styles.infoRow}>
           <Ionicons name="calendar-outline" size={24} color="#0D4D8D" />
           <View style={styles.infoContent}>
@@ -150,5 +165,20 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     fontSize: 16,
     fontWeight: '500',
+  },
+  editButton: {
+    backgroundColor: '#0D95D4',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 15,
+  },
+  editButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '500',
+    marginLeft: 8,
   },
 });

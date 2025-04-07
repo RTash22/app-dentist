@@ -8,19 +8,22 @@ const initialPatients = [
     id: '1',
     name: 'Juan Pérez',
     age: '35',
-    phone: '555-0101'
+    phone: '555-0101',
+    imageUri: null
   },
   {
     id: '2',
     name: 'María García',
     age: '28',
-    phone: '555-0102'
+    phone: '555-0102',
+    imageUri: null
   },
   {
     id: '3',
     name: 'Carlos López',
     age: '42',
-    phone: '555-0103'
+    phone: '555-0103',
+    imageUri: null
   }
 ];
 
