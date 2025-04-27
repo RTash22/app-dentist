@@ -8,6 +8,7 @@ import { CalendarScreen } from './Screens/CalendarScreen';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { AppProvider } from './context/AppContext';
 import { prin_cons } from './Screens/Citas/prin_cons';
+import { Min } from './Screens/Pruebas/Min'
 
 const Stack = createNativeStackNavigator();
 
@@ -18,11 +19,17 @@ export default function App() {
         <Stack.Navigator initialRouteName='Home' >
           <Stack.Screen name='Home' component={HomeScreen} />
           <Stack.Screen name='Patients' component={PacientsScreen} />
-          <Stack.Screen name='ConsultasScreen' component={ConsultasScreen} />
+          <Stack.Screen 
+            name='ConsultasScreen' 
+            component={ConsultasScreen} 
+            options={{ 
+              headerShown: false  // Esto ocultará la barra de navegación superior
+            }}
+          />
           <Stack.Screen 
             name='Calendar' 
             component={CalendarScreen}
-            options={{ title: 'Calendario de Consultas' }}
+            options={{ headerShown: false }}
           />
           <Stack.Screen 
             name='Citas' 
@@ -31,6 +38,10 @@ export default function App() {
               headerShown: false
             }}
           />
+          <Stack.Screen name = 'Min' component={Min} 
+           options={{
+            headerShown: false
+           }}/>
         </Stack.Navigator>
       </NavigationContainer>
     </AppProvider>

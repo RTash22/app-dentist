@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Modal, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Modal, ScrollView, TouchableOpacity, ImageBackground } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { useAppContext } from '../context/AppContext';
+import { Ionicons } from '@expo/vector-icons';
 
 export function CalendarScreen({ navigation }) {
   const { appointments } = useAppContext();
@@ -56,15 +57,37 @@ export function CalendarScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <Calendar
-        onDayPress={handleDayPress}
-        markedDates={markedDates}
-        theme={{
-          selectedDayBackgroundColor: '#2196F3',
-          todayTextColor: '#2196F3',
-          arrowColor: '#2196F3',
-        }}
-      />
+      <View style={styles.headerContent}>
+        <TouchableOpacity 
+          style={styles.headerButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Ionicons name="arrow-back" size={24} color="#333333" />
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={styles.headerButton}
+          onPress={() => navigation.navigate('Min')}
+        >
+          <Ionicons name="home" size={24} color="#333333" />
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.greetingContainer}>
+        <Text style={styles.greeting}>Agenda</Text>
+      </View>
+
+      <View style={{ paddingTop: 60 }}>
+        <Calendar
+          onDayPress={handleDayPress}
+          markedDates={markedDates}
+          theme={{
+            selectedDayBackgroundColor: '#2196F3',
+            todayTextColor: '#2196F3',
+            arrowColor: '#2196F3',
+          }}
+        />
+      </View>
 
       <Modal
         animationType="slide"
@@ -117,6 +140,28 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+  },
+  headerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingTop: 40,
+    paddingBottom: 10,
+    marginBottom: 10,
+  },
+  headerButton: {
+    padding: 8,
+  },
+  greetingContainer: {
+    position: 'absolute',
+    top: 90,
+    left: 30,
+  },
+  greeting: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#333',
   },
   modalContainer: {
     flex: 1,

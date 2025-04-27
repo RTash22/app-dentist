@@ -24,7 +24,7 @@ export function HomeScreen({ navigation }) {
 
         <TouchableOpacity 
         style={styles.button}
-        onPress={() => navigation.navigate('Citas')}>
+        onPress={() => navigation.navigate('Min')}>
           <Ionicons name="medical" size={32} color="#f44336" />
           <Text style={styles.buttonText}>Citas</Text>
         </TouchableOpacity>
