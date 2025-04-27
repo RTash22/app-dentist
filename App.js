@@ -2,22 +2,20 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { PacientsScreen } from './Screens/PacientsScreen';
-import { HomeScreen } from './Screens/HomeScreen';
 import { ConsultasScreen } from './Screens/ConsultasScreen';
 import { CalendarScreen } from './Screens/CalendarScreen';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { AppProvider } from './context/AppContext';
 import { prin_cons } from './Screens/Citas/prin_cons';
-import { Min } from './Screens/Pruebas/Min'
+import { HomeScreen } from './Screens/HomeScreen'
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
     <AppProvider>
-      <NavigationContainer >
-        <Stack.Navigator initialRouteName='Home' >
-          <Stack.Screen name='Home' component={HomeScreen} />
+      <NavigationContainer>
+        <Stack.Navigator initialRouteName='HomeScreen'>
           <Stack.Screen name='Patients' component={PacientsScreen} />
           <Stack.Screen 
             name='ConsultasScreen' 
@@ -38,10 +36,13 @@ export default function App() {
               headerShown: false
             }}
           />
-          <Stack.Screen name = 'Min' component={Min} 
-           options={{
-            headerShown: false
-           }}/>
+          <Stack.Screen 
+            name='HomeScreen' 
+            component={HomeScreen} 
+            options={{
+              headerShown: false
+            }}
+          />
         </Stack.Navigator>
       </NavigationContainer>
     </AppProvider>
