@@ -1,6 +1,6 @@
 // filepath: d:\React\app-dentist\Screens\HomeScreen.js
 import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, Platform, KeyboardAvoidingView, Keyboard } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -68,12 +68,6 @@ export function HomeScreen() {
           value={searchQuery}
           onChangeText={setSearchQuery}
           placeholderTextColor="#666"
-          keyboardShouldPersistTaps="handled"
-          keyboardType="default"
-          onFocus={() => {
-            // Manually dismiss keyboard when search is focused
-            Keyboard.dismiss();
-          }}
         />
       </View>
 
@@ -240,9 +234,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     backgroundColor: '#f5f5f5',
     borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
-    zIndex: 999999, // Increased zIndex
-    elevation: 999999, // Increased elevation
+    borderTopColor: '#e0e0e0'
   },
   appointmentsTitle: {
     fontSize: 17,
