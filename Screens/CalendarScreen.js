@@ -67,7 +67,7 @@ export function CalendarScreen({ navigation }) {
         
         <TouchableOpacity 
           style={styles.headerButton}
-          onPress={() => navigation.navigate('Min')}
+          onPress={() => navigation.navigate('HomeScreen')}
         >
           <Ionicons name="home" size={24} color="#333333" />
         </TouchableOpacity>

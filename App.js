@@ -21,7 +21,7 @@ export default function App() {
             name='ConsultasScreen' 
             component={ConsultasScreen} 
             options={{ 
-              headerShown: false  // Esto ocultará la barra de navegación superior
+              headerShown: false  
             }}
           />
           <Stack.Screen 

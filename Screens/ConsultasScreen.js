@@ -169,7 +169,7 @@ export function ConsultasScreen() {
           
           <TouchableOpacity 
             style={[styles.headerButton, styles.homeButton]}
-            onPress={() => navigation.navigate('Min')}
+            onPress={() => navigation.navigate('HomeScreen')}
           >
             <Ionicons name="home" size={24} color="#fff" />
           </TouchableOpacity>
@@ -195,43 +195,55 @@ export function ConsultasScreen() {
       <Text style={styles.sectionTitle}>Lista de Consultas</Text>
 
       <TouchableOpacity 
-        style={styles.addButton}
+        style={styles.fabButton}
         onPress={() => {
-          resetForm();
+          setEditingAppointment(null);
+          setFormData({
+            id: '',
+            patientId: '',
+            patientName: '',
+            date: new Date(),
+            description: '',
+          });
           setModalVisible(true);
         }}
       >
-        <Text style={styles.addButtonText}>Nueva Consulta</Text>
+        <Ionicons name="add" size={24} color="white" />
+        <Text style={styles.fabButtonText}>Nueva Consulta</Text>
       </TouchableOpacity>
 
-      <FlatList
-        data={appointments}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.appointmentCard}>
-            <View style={styles.appointmentInfo}>
-              <Text style={styles.patientName}>{item.patientName}</Text>
-              <Text>Fecha: {formatDate(new Date(item.date))}</Text>
-              <Text>Hora: {formatTime(new Date(item.date))}</Text>
-              <Text>Descripción: {item.description}</Text>
+      <View style={styles.listContainer}>
+        <FlatList
+          data={appointments}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.appointmentsList}
+          bounces={false} // Prevents bouncing at the top
+          renderItem={({ item }) => (
+            <View style={styles.appointmentCard}>
+              <View style={styles.appointmentInfo}>
+                <Text style={styles.patientName}>{item.patientName}</Text>
+                <Text>Fecha: {formatDate(new Date(item.date))}</Text>
+                <Text>Hora: {formatTime(new Date(item.date))}</Text>
+                <Text>Descripción: {item.description}</Text>
+              </View>
+              <View style={styles.actionButtons}>
+                <TouchableOpacity 
+                  style={[styles.actionButton, styles.editButton]}
+                  onPress={() => editAppointment(item)}
+                >
+                  <Text style={styles.buttonText}>Editar</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={[styles.actionButton, styles.deleteButton]}
+                  onPress={() => deleteAppointmentHandler(item.id)}
+                >
+                  <Text style={styles.buttonText}>Eliminar</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-            <View style={styles.actionButtons}>
-              <TouchableOpacity 
-                style={[styles.actionButton, styles.editButton]}
-                onPress={() => editAppointment(item)}
-              >
-                <Text style={styles.buttonText}>Editar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={[styles.actionButton, styles.deleteButton]}
-                onPress={() => deleteAppointmentHandler(item.id)}
-              >
-                <Text style={styles.buttonText}>Eliminar</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
-      />
+          )}
+        />
+      </View>
 
       <Modal
         animationType="slide"
@@ -402,14 +414,14 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   greeting: {
-    top: 240,
+    top: 180, // Changed from 240 to 180
     fontSize: 28,
     fontWeight: 'bold',
     color: '#333',
   },
   searchContainer: {
     position: 'absolute',
-    top: 380,
+    top: 320,
     left: 20,
     right: 20,
     flexDirection: 'row',
@@ -425,6 +437,7 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.1,
     shadowRadius: 3,
+    zIndex: 2, // Asegura que el buscador esté siempre visible
   },
   searchIcon: {
     marginRight: 10,
@@ -437,12 +450,13 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     position: 'absolute',
-    top: 418,
+    top: 358,
     left: 20,
     fontSize: 17,
     fontWeight: 'bold',
     color: '#333',
     marginTop: 20,
+    zIndex: 2, // Asegura que el texto esté siempre visible
   },
   addButton: {
     top: 22,
@@ -459,12 +473,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   appointmentCard: {
-    top: 160,
     backgroundColor: 'white',
     padding: 16,
     borderRadius: 8,
     marginBottom: 12,
-    marginHorizontal: 20,
     elevation: 2,
   },
   appointmentInfo: {
@@ -806,11 +818,48 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 8,
     borderWidth: 3.5,
-    borderColor: '#77C4FF',
+    borderColor: '#2FA0AD', 
     elevation: 0,
     shadowColor: 'transparent',
     shadowOffset: null,
     shadowOpacity: 0,
     shadowRadius: 0,
+  },
+  fabButton: {
+    position: 'absolute',
+    right: 20,
+    bottom: 30,
+    backgroundColor: '#2FA0AD',
+    borderRadius: 30,
+    padding: 15,
+    flexDirection: 'row',
+    alignItems: 'center',
+    elevation: 8,
+    zIndex: 9999,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.30,
+    shadowRadius: 4.65,
+  },
+  fabButtonText: {
+    color: 'white',
+    marginLeft: 10,
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  appointmentsList: {
+    paddingHorizontal: 20,
+    paddingBottom: 100, // Espacio para el FAB button
+  },
+  listContainer: {
+    position: 'absolute',
+    top: 420, // Alineado con el texto "Lista de Consultas"
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: '#f5f5f5',
   },
 });

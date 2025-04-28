@@ -1,6 +1,6 @@
 // filepath: d:\React\app-dentist\Screens\HomeScreen.js
 import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, Platform, KeyboardAvoidingView, Keyboard } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -68,6 +68,12 @@ export function HomeScreen() {
           value={searchQuery}
           onChangeText={setSearchQuery}
           placeholderTextColor="#666"
+          keyboardShouldPersistTaps="handled"
+          keyboardType="default"
+          onFocus={() => {
+            // Manually dismiss keyboard when search is focused
+            Keyboard.dismiss();
+          }}
         />
       </View>
 
@@ -86,7 +92,7 @@ export function HomeScreen() {
         ))}
       </View>
 
-      <View style={styles.appointmentsContainer}>
+      <View style={styles.fixedAppointmentsContainer}>
         <Text style={styles.appointmentsTitle}>Próximas Citas</Text>
         <FlatList
           data={upcomingAppointments}
@@ -122,6 +128,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#f5f5f5',
+    paddingBottom: 150, // Add padding to account for fixed appointments container
   },
   headerGradient: {
     position: 'absolute',
@@ -175,6 +182,7 @@ const styles = StyleSheet.create({
     height: 45,
     fontSize: 16,
     color: '#333',
+    paddingVertical: Platform.OS === 'ios' ? 12 : 8,
   },
   sectionTitle: {
     position: 'absolute',
@@ -222,12 +230,19 @@ const styles = StyleSheet.create({
     color: '#333',
     fontWeight: '500',
   },
-  appointmentsContainer: {
+  fixedAppointmentsContainer: {
     position: 'absolute',
-    bottom: 90, 
-    left: 20,
-    right: 20,
-    height: 120,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 150,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    backgroundColor: '#f5f5f5',
+    borderTopWidth: 1,
+    borderTopColor: '#e0e0e0',
+    zIndex: 999999, // Increased zIndex
+    elevation: 999999, // Increased elevation
   },
   appointmentsTitle: {
     fontSize: 17,
