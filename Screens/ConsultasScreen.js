@@ -795,7 +795,6 @@ const styles = StyleSheet.create({
     width: Platform.OS === 'ios' ? 320 : '100%',
     height: 200,
   },
-<<<<<<< HEAD
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -817,7 +816,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
-=======
+  },
   header: {
     height: Dimensions.get('window').height / 3,
     width: '100%',
@@ -844,6 +843,5 @@ const styles = StyleSheet.create({
     shadowOffset: null,
     shadowOpacity: 0,
     shadowRadius: 0,
->>>>>>> c0ccd290ad0595cff17403e79ae937addf8bf981
   },
 });

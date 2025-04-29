@@ -20,6 +20,16 @@ export default function App() {
         <Stack.Navigator initialRouteName='HomeScreen'>
           <Stack.Screen name='Patients' component={PacientsScreen} />
           <Stack.Screen 
+            name='PatientDetails' 
+            component={PatientDetailsScreen}
+            options={{ title: 'Detalles del Paciente' }}
+          />
+          <Stack.Screen 
+            name='EditPatient' 
+            component={EditPatientScreen}
+            options={{ title: 'Editar Paciente' }}
+          />
+          <Stack.Screen 
             name='ConsultasScreen' 
             component={ConsultasScreen} 
             options={{ 

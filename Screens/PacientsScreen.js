@@ -130,31 +130,25 @@ export function PacientsScreen({ navigation }) {
         data={filteredPatients}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <View style={styles.patientCard}>
-            <View style={styles.imageContainer}>
+          <TouchableOpacity 
+            style={styles.patientCard}
+            onPress={() => navigation.navigate('PatientDetails', { patientId: item.id })}
+          >
+            <View style={styles.patientInfo}>
               {item.imageUri ? (
-                <Image 
-                  source={{ uri: item.imageUri }} 
-                  style={styles.imagePlaceholder}
-                />
+                <Image source={{ uri: item.imageUri }} style={styles.patientImage} />
               ) : (
                 <View style={styles.imagePlaceholder}>
-                  <Ionicons name="person" size={40} color="#cccccc" />
+                  <Ionicons name="person" size={30} color="#cccccc" />
                 </View>
               )}
+              <View style={styles.textContainer}>
+                <Text style={styles.patientName}>{item.name}</Text>
+                <Text style={styles.patientDetails}>Edad: {item.age}</Text>
+                <Text style={styles.patientDetails}>Tel: {item.phone}</Text>
+              </View>
             </View>
-            <TouchableOpacity 
-              style={styles.patientButton}
-              onPress={() => {
-                navigation.navigate('PatientDetails', {
-                  patientId: item.id
-                });
-              }}
-            >
-              <Text style={styles.patientText}>{item.name}</Text>
-              <Text style={styles.patientDetails}>Edad: {item.age} | Tel: {item.phone}</Text>
-            </TouchableOpacity>
-          </View>
+          </TouchableOpacity>
         )}
       />
 
@@ -397,6 +391,25 @@ const styles = StyleSheet.create({
     backgroundColor: '#0D95D4',
   },
   buttonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  patientInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 15,
+  },
+  patientImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 10,
+  },
+  textContainer: {
+    flex: 1,
+  },
+  patientName: {
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
