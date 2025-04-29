@@ -1,38 +1,116 @@
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+// filepath: d:\React\app-dentist\Screens\HomeScreen.js
+import React, { useState, useMemo } from 'react';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { LinearGradient } from 'expo-linear-gradient';
 
-export function HomeScreen({ navigation }) {
+export function HomeScreen() {
+  const navigation = useNavigation();
+  const [searchQuery, setSearchQuery] = useState('');
+  
+  const upcomingAppointments = [
+    { id: '1', patientName: 'Juan Pérez', date: '27/04/2025', time: '09:00' },
+    { id: '2', patientName: 'María García', date: '27/04/2025', time: '10:30' },
+    { id: '3', patientName: 'Carlos López', date: '28/04/2025', time: '11:00' },
+    { id: '4', patientName: 'Ana Martínez', date: '28/04/2025', time: '12:30' }
+  ];
+
+  const services = [
+    { id: 1, name: 'Agenda', icon: 'calendar' },
+    { id: 4, name: 'Citas', icon: 'medical' },  
+    { id: 3, name: 'Pacientes', icon: 'people' },
+    { id: 2, name: 'Historial', icon: 'time' }    
+  ];
+
+  const filteredServices = useMemo(() => {
+    return services.filter(service =>
+      service.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [searchQuery]);
+
+  const getTimeBasedGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 12) return 'Buenos días';
+    if (hour >= 12 && hour < 19) return 'Buenas tardes';
+    return 'Buenas noches';
+  };
+
+  const handleServicePress = (serviceName) => {
+    if (serviceName === 'Agenda') {
+      navigation.navigate('Calendar');
+    }
+    if (serviceName === 'Citas') {
+        navigation.navigate('ConsultasScreen');
+      }
+    if (serviceName === 'Pacientes') {
+        navigation.navigate('Patients');
+      }
+  };
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Sistema Dental</Text>
+      <LinearGradient
+        colors={['#21588E', '#2FA0AD']}
+        style={styles.headerGradient}
+      >
+        <View style={styles.greetingContainer}>
+          <Text style={[styles.smallGreeting, { color: '#fff' }]}>¡Hola!</Text>
+          <Text style={[styles.greeting, { color: '#fff' }]}>{getTimeBasedGreeting()}</Text>
+        </View>
+      </LinearGradient>
+
+      <View style={styles.searchContainer}>
+        <Ionicons name="search" size={20} color="#666" style={styles.searchIcon} />
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Buscar servicios..."
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          placeholderTextColor="#666"
+        />
+      </View>
+
+      <Text style={styles.sectionTitle}>Servicios</Text>
+
       <View style={styles.gridContainer}>
-        <TouchableOpacity 
-          style={styles.button}
-          onPress={() => navigation.navigate('Patients')}
-        >
-          <Ionicons name="people" size={32} color="#2196F3" />
-          <Text style={styles.buttonText}>Pacientes</Text>
-        </TouchableOpacity>
+        {filteredServices.map(service => (
+          <TouchableOpacity 
+            key={service.id} 
+            style={styles.gridItem}
+            onPress={() => handleServicePress(service.name)}
+          >
+            <Ionicons name={service.icon} size={32} color="#378DD0" />
+            <Text style={styles.gridItemText}>{service.name}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
 
-        <TouchableOpacity 
-          style={styles.button}
-          onPress={() => navigation.navigate('Calendar')}
-        >
-          <Ionicons name="calendar" size={32} color="#4CAF50" />
-          <Text style={styles.buttonText}>Calendario</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity 
-        style={styles.button}
-        onPress={() => navigation.navigate('Consultas') }>
-          <Ionicons name="medical" size={32} color="#f44336" />
-          <Text style={styles.buttonText}>Citas</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.button}>
-          <Ionicons name="stats-chart" size={32} color="#9C27B0" />
-          <Text style={styles.buttonText}>Reportes</Text>
-        </TouchableOpacity>
+      <View style={styles.appointmentsContainer}>
+        <Text style={styles.appointmentsTitle}>Próximas Citas</Text>
+        <FlatList
+          data={upcomingAppointments}
+          keyExtractor={(item) => item.id}
+          style={styles.appointmentsList}
+          horizontal={true}
+          showsHorizontalScrollIndicator={false}
+          renderItem={({ item, index }) => (
+            <View style={[
+              styles.appointmentCard,
+              { 
+                borderColor: index % 2 === 0 ? '#21588E' : '#2FA0AD',
+                backgroundColor: index % 2 === 0 ? '#21588E' : '#2FA0AD'
+              }
+            ]}>
+              <Text style={[styles.patientName, { color: 'white' }]}>
+                {item.patientName}
+              </Text>
+              <Text style={[styles.appointmentTime, { color: 'white' }]}>
+                {item.date} - {item.time}
+              </Text>
+            </View>
+          )}
+        />
       </View>
     </View>
   );
@@ -41,46 +119,149 @@ export function HomeScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#f5f5f5',
-    padding: 20,
   },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 40,
-    marginTop: 20,
+  headerGradient: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 200,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+  },
+  greetingContainer: {
+    position: 'absolute',
+    top: 90,
+    left: 30,
+  },
+  smallGreeting: {
+    fontSize: 17,  
+    fontWeight: '400',
+    color: '#333',
+    marginBottom: 5,
+  },
+  greeting: {
+    fontSize: 28,  
+    fontWeight: 'bold', 
     color: '#333',
   },
-  gridContainer: {
+  searchContainer: {
+    position: 'absolute',
+    top: 175,
+    left: 20,
+    right: 20,
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
     alignItems: 'center',
-    width: '100%',
-    maxWidth: 600,
-  },
-  button: {
-    width: '40%',
-    aspectRatio: 1,
-    margin: '5%',
     backgroundColor: 'white',
+    paddingHorizontal: 15,
     borderRadius: 15,
-    justifyContent: 'center',
-    alignItems: 'center',
     elevation: 4,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 2,
     },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
-  buttonText: {
-    marginTop: 10,
+  searchIcon: {
+    marginRight: 10,
+  },
+  searchInput: {
+    flex: 1,
+    height: 45,
     fontSize: 16,
-    fontWeight: '600',
     color: '#333',
   },
+  sectionTitle: {
+    position: 'absolute',
+    top: 230,
+    left: 20,
+    fontSize: 17,
+    fontWeight: 'bold',
+    color: '#333',
+    marginTop: 20,
+  },
+  gridContainer: {
+    position: 'absolute',
+    top: 290, 
+    left: 20,
+    right: 20,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'flex-start',
+  },
+  gridItem: {
+    width: '30%',
+    aspectRatio: 1,
+    backgroundColor: 'white',
+    borderRadius: 15,
+    padding: 15,
+    marginRight: 10,
+    marginBottom: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 3.5,
+    borderColor: '#77C4FF',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    transform: [{ scale: 0.98 }],
+  },
+  gridItemText: {
+    marginTop: 8,
+    fontSize: 12,
+    color: '#333',
+    fontWeight: '500',
+  },
+  appointmentsContainer: {
+    position: 'absolute',
+    bottom: 90, 
+    left: 20,
+    right: 20,
+    height: 120,
+  },
+  appointmentsTitle: {
+    fontSize: 17,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 10,
+  },
+  appointmentsList: {
+    flex: 1,
+  },
+  appointmentCard: {
+    backgroundColor: 'white',
+    padding: 12,
+    borderRadius: 15,
+    marginRight: 15,
+    borderWidth: 0,
+    width: 200,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  patientName: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  appointmentTime: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 4,
+  }
 });

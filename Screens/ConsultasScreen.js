@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, Modal, TextInput, Alert, Platform, ScrollView, SafeAreaView, Dimensions, ActionSheetIOS, Keyboard } from 'react-native';
+import React, { useState, useMemo } from 'react';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, Modal, TextInput, Alert, Platform, ScrollView, SafeAreaView, Dimensions, ActionSheetIOS, Keyboard, ImageBackground } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useAppContext } from '../context/AppContext';
+import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 
-export function ConsultasScreen({ navigation }) {
+export function ConsultasScreen() {
+  const navigation = useNavigation();
   const { patients, appointments, addAppointment, updateAppointment, deleteAppointment } = useAppContext();
   const [modalVisible, setModalVisible] = useState(false);
   const [showPatientPicker, setShowPatientPicker] = useState(false);
@@ -18,6 +21,7 @@ export function ConsultasScreen({ navigation }) {
     description: '',
   });
   const [mode, setMode] = useState('date');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const formatDate = (date) => {
     return date.toLocaleDateString('es-ES');
@@ -157,6 +161,46 @@ export function ConsultasScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
+      <ImageBackground
+        source={require('../assets/banner-dental.jpg')}
+        style={styles.header}
+        resizeMode="cover"
+      >
+        <View style={styles.headerContent}>
+          <TouchableOpacity 
+            style={styles.headerButton}
+            onPress={() => navigation.goBack()}
+          >
+            <Ionicons name="arrow-back" size={24} color="#333333" />
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={[styles.headerButton, styles.homeButton]}
+            onPress={() => navigation.navigate('Min')}
+          >
+            <Ionicons name="home" size={24} color="#fff" />
+          </TouchableOpacity>
+        </View>
+      </ImageBackground>
+
+      <View style={styles.greetingContainer}>
+        
+        <Text style={styles.greeting}>Consultas</Text>
+      </View>
+
+      <View style={styles.searchContainer}>
+        <Ionicons name="search" size={20} color="#666" style={styles.searchIcon} />
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Buscar consultas..."
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          placeholderTextColor="#666"
+        />
+      </View>
+
+      <Text style={styles.sectionTitle}>Lista de Consultas</Text>
+
       <TouchableOpacity 
         style={styles.addButton}
         onPress={() => {
@@ -353,14 +397,69 @@ export function ConsultasScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
     backgroundColor: '#f5f5f5',
   },
+  greetingContainer: {
+    position: 'absolute',
+    top: 90,
+    left: 30,
+  },
+  smallGreeting: {
+    fontSize: 17,
+    fontWeight: '400',
+    color: '#333',
+    marginBottom: 5,
+  },
+  greeting: {
+    top: 240,
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  searchContainer: {
+    position: 'absolute',
+    top: 380,
+    left: 20,
+    right: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#e3e2e0',
+    paddingHorizontal: 15,
+    borderRadius: 10,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+  },
+  searchIcon: {
+    marginRight: 10,
+  },
+  searchInput: {
+    flex: 1,
+    height: 45,
+    fontSize: 16,
+    color: '#333',
+  },
+  sectionTitle: {
+    position: 'absolute',
+    top: 418,
+    left: 20,
+    fontSize: 17,
+    fontWeight: 'bold',
+    color: '#333',
+    marginTop: 20,
+  },
   addButton: {
+    top: 22,
     backgroundColor: '#2196F3',
     padding: 15,
-    borderRadius: 8,
+    borderRadius: 12,
     marginBottom: 16,
+    marginHorizontal: 23, 
   },
   addButtonText: {
     color: 'white',
@@ -369,10 +468,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   appointmentCard: {
+    top: 160,
     backgroundColor: 'white',
     padding: 16,
     borderRadius: 8,
     marginBottom: 12,
+    marginHorizontal: 20,
     elevation: 2,
   },
   appointmentInfo: {
@@ -694,6 +795,7 @@ const styles = StyleSheet.create({
     width: Platform.OS === 'ios' ? 320 : '100%',
     height: 200,
   },
+<<<<<<< HEAD
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -715,5 +817,33 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
+=======
+  header: {
+    height: Dimensions.get('window').height / 3,
+    width: '100%',
+  },
+  headerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingTop: 40,
+    paddingBottom: 10,
+  },
+  headerButton: {
+    padding: 8,
+  },
+  homeButton: {
+    backgroundColor: 'rgba(0,0,0,0.2)',
+    borderRadius: 20,
+    padding: 8,
+    borderWidth: 3.5,
+    borderColor: '#77C4FF',
+    elevation: 0,
+    shadowColor: 'transparent',
+    shadowOffset: null,
+    shadowOpacity: 0,
+    shadowRadius: 0,
+>>>>>>> c0ccd290ad0595cff17403e79ae937addf8bf981
   },
 });
