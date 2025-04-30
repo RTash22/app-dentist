@@ -33,17 +33,7 @@ export function PatientDetailsScreen({ route, navigation }) {
           )}
         </View>
         <Text style={styles.name}>{patient.name}</Text>
-      </View>
-
-      <View style={styles.infoSection}>
-        <TouchableOpacity 
-          style={styles.editButton}
-          onPress={() => navigation.replace('EditPatient', { patientId: patient.id })}
-        >
-          <Ionicons name="pencil" size={24} color="white" />
-          <Text style={styles.editButtonText}>Editar</Text>
-        </TouchableOpacity>
-
+      </View>      <View style={styles.infoSection}>
         <View style={styles.infoRow}>
           <Ionicons name="calendar-outline" size={24} color="#0D4D8D" />
           <View style={styles.infoContent}>
@@ -56,26 +46,17 @@ export function PatientDetailsScreen({ route, navigation }) {
           <Ionicons name="call-outline" size={24} color="#0D4D8D" />
           <View style={styles.infoContent}>
             <Text style={styles.infoLabel}>Teléfono</Text>
-            <Text style={styles.infoValue}>{patient.phone}</Text>
-          </View>
+            <Text style={styles.infoValue}>{patient.phone}</Text>          </View>
         </View>
       </View>
 
-      <View style={styles.actionsContainer}>
+      <View style={styles.bottomContainer}>
         <TouchableOpacity 
-          style={[styles.actionButton, { backgroundColor: '#4CAF50' }]}
-          onPress={() => navigation.navigate('Consultas', { patientId: patient.id })}
+          style={styles.editButton}
+          onPress={() => navigation.replace('EditPatient', { patientId: patient.id })}
         >
-          <Ionicons name="medical" size={24} color="white" />
-          <Text style={styles.actionButtonText}>Nueva Consulta</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity 
-          style={[styles.actionButton, { backgroundColor: '#2196F3' }]}
-          onPress={() => navigation.navigate('Calendar')}
-        >
-          <Ionicons name="calendar" size={24} color="white" />
-          <Text style={styles.actionButtonText}>Ver Historial</Text>
+          <Ionicons name="pencil" size={24} color="white" />
+          <Text style={styles.editButtonText}>Editar</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -145,35 +126,19 @@ const styles = StyleSheet.create({
     color: '#333',
     fontWeight: '500',
     marginTop: 2,
-  },
-  actionsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  },  bottomContainer: {
     padding: 15,
+    alignItems: 'center',
+    marginTop: 10,
   },
-  actionButton: {
-    flex: 1,
+  editButton: {
+    backgroundColor: '#77C4FF',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     padding: 15,
     borderRadius: 10,
-    marginHorizontal: 5,
-  },
-  actionButtonText: {
-    color: 'white',
-    marginLeft: 8,
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  editButton: {
-    backgroundColor: '#0D95D4',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 15,
+    width: '40%',
   },
   editButtonText: {
     color: 'white',
