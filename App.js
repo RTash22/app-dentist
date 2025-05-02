@@ -4,6 +4,8 @@ import { NavigationContainer } from '@react-navigation/native';
 import { PacientsScreen } from './Screens/PacientsScreen';
 import { ConsultasScreen } from './Screens/ConsultasScreen';
 import { CalendarScreen } from './Screens/CalendarScreen';
+import { DoctorsScreen } from './Screens/DoctorsScreen';
+import { LoginScreen } from './Screens/LoginScreen';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { AppProvider } from './context/AppContext';
 import { prin_cons } from './Screens/Citas/prin_cons';
@@ -15,13 +17,20 @@ export default function App() {
   return (
     <AppProvider>
       <NavigationContainer>
-        <Stack.Navigator initialRouteName='HomeScreen'>
+        <Stack.Navigator initialRouteName='Login'>
+          <Stack.Screen 
+            name='Login' 
+            component={LoginScreen} 
+            options={{ 
+              headerShown: false 
+            }}
+          />
           <Stack.Screen name='Patients' component={PacientsScreen} />
           <Stack.Screen 
             name='ConsultasScreen' 
             component={ConsultasScreen} 
             options={{ 
-              headerShown: false  // Esto ocultará la barra de navegación superior
+              headerShown: false
             }}
           />
           <Stack.Screen 
@@ -41,6 +50,20 @@ export default function App() {
             component={HomeScreen} 
             options={{
               headerShown: false
+            }}
+          />
+          <Stack.Screen 
+            name='Doctors' 
+            component={DoctorsScreen}
+            options={{
+              title: 'Gestión de Doctores',
+              headerStyle: {
+                backgroundColor: '#2196F3',
+              },
+              headerTintColor: '#fff',
+              headerTitleStyle: {
+                fontWeight: 'bold',
+              },
             }}
           />
         </Stack.Navigator>
