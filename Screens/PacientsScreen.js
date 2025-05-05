@@ -272,7 +272,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 12,
-    backgroundColor: '#0D4D8D',
+    backgroundColor: '#21588E',
     borderRadius: 8,
     shadowColor: '#000',
     shadowOffset: {
@@ -314,7 +314,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 20,
     bottom: 20,
-    backgroundColor: '#0D95D4',
+    backgroundColor: '#2FA0AD',
     padding: 16,
     borderRadius: 50,
     elevation: 5,
