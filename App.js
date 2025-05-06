@@ -1,51 +1,31 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { LoginScreen } from './Screens/LoginScreen';
+import { HomeScreen } from './Screens/HomeScreen';
 import { PacientsScreen } from './Screens/PacientsScreen';
 import { ConsultasScreen } from './Screens/ConsultasScreen';
 import { CalendarScreen } from './Screens/CalendarScreen';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { AppProvider } from './context/AppContext';
 import { prin_cons } from './Screens/Citas/prin_cons';
-import { HomeScreen } from './Screens/HomeScreen'
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
-    <AppProvider>
-      <NavigationContainer>
-        <Stack.Navigator initialRouteName='HomeScreen'>
-          <Stack.Screen name='Patients' component={PacientsScreen} />
-          <Stack.Screen 
-            name='ConsultasScreen' 
-            component={ConsultasScreen} 
-            options={{ 
-              headerShown: false  // Esto ocultará la barra de navegación superior
-            }}
-          />
-          <Stack.Screen 
-            name='Calendar' 
-            component={CalendarScreen}
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen 
-            name='Citas' 
-            component={prin_cons}
-            options={{ 
-              headerShown: false
-            }}
-          />
-          <Stack.Screen 
-            name='HomeScreen' 
-            component={HomeScreen} 
-            options={{
-              headerShown: false
-            }}
-          />
+    <NavigationContainer>
+      <AppProvider>
+        <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="HomeScreen" component={HomeScreen} />
+          <Stack.Screen name="Pacients" component={PacientsScreen} />
+          <Stack.Screen name="Consultas" component={ConsultasScreen} />
+          <Stack.Screen name="Calendar" component={CalendarScreen} />
+          <Stack.Screen name="PrinCons" component={prin_cons} />
         </Stack.Navigator>
-      </NavigationContainer>
-    </AppProvider>
+      </AppProvider>
+    </NavigationContainer>
   );
 }
 
