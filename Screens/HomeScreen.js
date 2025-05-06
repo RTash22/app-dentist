@@ -1,80 +1,96 @@
-// filepath: d:\React\app-dentist\Screens\HomeScreen.js
-import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, Alert, SafeAreaView, StatusBar, ScrollView, Dimensions, ActivityIndicator } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useAppContext } from '../context/AppContext';
+"use client"
+
+import { useState, useMemo } from "react"
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  FlatList,
+  Alert,
+  SafeAreaView,
+  StatusBar,
+  ScrollView,
+  ActivityIndicator,
+} from "react-native"
+import { Ionicons } from "@expo/vector-icons"
+import { useNavigation } from "@react-navigation/native"
+import { LinearGradient } from "expo-linear-gradient"
+import { useAppContext } from "../context/AppContext"
 
 export function HomeScreen() {
-  const navigation = useNavigation();
-  const { userData, logout, loadingUser, isAdmin } = useAppContext();
-  const [searchQuery, setSearchQuery] = useState('');
-  
+  const navigation = useNavigation()
+  const { userData, logout, loadingUser, isAdmin } = useAppContext()
+  const [searchQuery, setSearchQuery] = useState("")
+
   const upcomingAppointments = [
-    { id: '1', patientName: 'Juan Pérez', date: '27/04/2025', time: '09:00' },
-    { id: '2', patientName: 'María García', date: '27/04/2025', time: '10:30' },
-    { id: '3', patientName: 'Carlos López', date: '28/04/2025', time: '11:00' },
-    { id: '4', patientName: 'Ana Martínez', date: '28/04/2025', time: '12:30' }
-  ];
+    { id: "1", patientName: "Juan Pérez", date: "27/04/2025", time: "09:00" },
+    { id: "2", patientName: "María García", date: "27/04/2025", time: "10:30" },
+    { id: "3", patientName: "Carlos López", date: "28/04/2025", time: "11:00" },
+    { id: "4", patientName: "Ana Martínez", date: "28/04/2025", time: "12:30" },
+  ]
 
   const baseServices = [
-    { id: 1, name: 'Agenda', icon: 'calendar' },
-    { id: 4, name: 'Citas', icon: 'medical' },  
-    { id: 3, name: 'Pacientes', icon: 'people' },
-    { id: 2, name: 'Historial', icon: 'time' }    
-  ];
-  
-  const adminServices = [
-    { id: 5, name: 'Doctores', icon: 'medkit' }
-  ];
+    { id: 1, name: "Agenda", icon: "calendar" },
+    { id: 4, name: "Citas", icon: "medical" },
+    { id: 3, name: "Pacientes", icon: "people" },
+    { id: 2, name: "Historial", icon: "time" },
+  ]
 
+  const adminServices = [{ id: 5, name: "Doctores", icon: "medkit" }]
+
+  // Usar isAdmin del contexto para determinar qué servicios mostrar
   const services = useMemo(() => {
     if (isAdmin) {
-      return [...baseServices, ...adminServices];
+      return [...baseServices, ...adminServices]
     }
-    return baseServices;
-  }, [isAdmin]);
+    return baseServices
+  }, [isAdmin])
 
   const filteredServices = useMemo(() => {
-    return services.filter(service =>
-      service.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [searchQuery, services]);
+    return services.filter((service) => service.name.toLowerCase().includes(searchQuery.toLowerCase()))
+  }, [searchQuery, services])
 
   const getTimeBasedGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour >= 5 && hour < 12) return 'Buenos días';
-    if (hour >= 12 && hour < 19) return 'Buenas tardes';
-    return 'Buenas noches';
-  };
+    const hour = new Date().getHours()
+    if (hour >= 5 && hour < 12) return "Buenos días"
+    if (hour >= 12 && hour < 19) return "Buenas tardes"
+    return "Buenas noches"
+  }
 
   const handleServicePress = (serviceName) => {
-    if (serviceName === 'Agenda') {
-      navigation.navigate('Calendar');
+    if (serviceName === "Agenda") {
+      navigation.navigate("Calendar")
     }
-    if (serviceName === 'Citas') {
-      navigation.navigate('ConsultasScreen');
+    if (serviceName === "Citas") {
+      navigation.navigate("ConsultasScreen")
     }
-    if (serviceName === 'Pacientes') {
-      navigation.navigate('Patients');
+    if (serviceName === "Pacientes") {
+      navigation.navigate("Patients")
     }
-    if (serviceName === 'Doctores') {
-      navigation.navigate('Doctors');
+    if (serviceName === "Doctores") {
+      // Solo navegar a Doctores si el usuario es admin
+      if (isAdmin) {
+        navigation.navigate("Doctors")
+      } else {
+        Alert.alert("Acceso Restringido", "Solo los administradores pueden acceder a esta sección.")
+      }
     }
-  };
+  }
 
   const handleLogout = async () => {
-    const result = await logout();
-    if (result) {
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'Login' }],
-      });
-    } else {
-      Alert.alert('Error', 'No se pudo cerrar sesión. Inténtalo de nuevo.');
-    }
-  };
+      try {
+        await AsyncStorage.removeItem('authToken');
+        await AsyncStorage.removeItem('userData');
+        
+        // Navegar al login
+        navigation.replace('Login');
+      } catch (error) {
+        console.error('Error during logout:', error);
+      }
+    
+  }
 
   if (loadingUser) {
     return (
@@ -82,32 +98,26 @@ export function HomeScreen() {
         <ActivityIndicator size="large" color="#2196F3" />
         <Text style={styles.loadingText}>Cargando información del usuario...</Text>
       </View>
-    );
+    )
   }
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="light-content" />
       <View style={styles.container}>
-        <LinearGradient
-          colors={['#21588E', '#2FA0AD']}
-          style={styles.headerGradient}
-        >
+        <LinearGradient colors={["#21588E", "#2FA0AD"]} style={styles.headerGradient}>
           <View style={styles.headerContent}>
             <View style={styles.greetingContainer}>
-              <Text style={styles.smallGreeting}>¡Hola, {userData?.nombre || 'Doctor'}!</Text>
+              <Text style={styles.smallGreeting}>¡Hola, {userData?.nombre || "Doctor"}!</Text>
               <Text style={styles.greeting}>{getTimeBasedGreeting()}</Text>
             </View>
-            <TouchableOpacity
-              style={styles.logoutButton}
-              onPress={handleLogout}
-            >
+            <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
               <Ionicons name="log-out-outline" size={24} color="white" />
             </TouchableOpacity>
           </View>
         </LinearGradient>
 
-        <ScrollView 
+        <ScrollView
           style={styles.scrollContent}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContentContainer}
@@ -123,10 +133,10 @@ export function HomeScreen() {
                 placeholderTextColor="#666"
               />
             </View>
-            
+
             <View style={styles.userInfoBox}>
-              <Text style={styles.userRole}>{userData?.especialidad || 'Odontología'}</Text>
-              <Text style={styles.userSubtitle}>{userData?.rol === 'admin' ? 'Administrador' : 'Doctor'}</Text>
+              <Text style={styles.userRole}>{userData?.especialidad || "Odontología"}</Text>
+              <Text style={styles.userSubtitle}>{userData?.rol === "admin" ? "Administrador" : "Doctor"}</Text>
             </View>
           </View>
 
@@ -134,9 +144,9 @@ export function HomeScreen() {
             <Text style={styles.sectionTitle}>Servicios</Text>
 
             <View style={styles.gridContainer}>
-              {filteredServices.map(service => (
-                <TouchableOpacity 
-                  key={service.id} 
+              {filteredServices.map((service) => (
+                <TouchableOpacity
+                  key={service.id}
                   style={styles.gridItem}
                   onPress={() => handleServicePress(service.name)}
                 >
@@ -156,17 +166,17 @@ export function HomeScreen() {
               horizontal={true}
               showsHorizontalScrollIndicator={false}
               renderItem={({ item, index }) => (
-                <View style={[
-                  styles.appointmentCard,
-                  { 
-                    borderColor: index % 2 === 0 ? '#21588E' : '#2FA0AD',
-                    backgroundColor: index % 2 === 0 ? '#21588E' : '#2FA0AD'
-                  }
-                ]}>
-                  <Text style={[styles.patientName, { color: 'white' }]}>
-                    {item.patientName}
-                  </Text>
-                  <Text style={[styles.appointmentTime, { color: 'white' }]}>
+                <View
+                  style={[
+                    styles.appointmentCard,
+                    {
+                      borderColor: index % 2 === 0 ? "#21588E" : "#2FA0AD",
+                      backgroundColor: index % 2 === 0 ? "#21588E" : "#2FA0AD",
+                    },
+                  ]}
+                >
+                  <Text style={[styles.patientName, { color: "white" }]}>{item.patientName}</Text>
+                  <Text style={[styles.appointmentTime, { color: "white" }]}>
                     {item.date} - {item.time}
                   </Text>
                 </View>
@@ -176,24 +186,24 @@ export function HomeScreen() {
         </ScrollView>
       </View>
     </SafeAreaView>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f5f5f5',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f5f5f5",
   },
   loadingText: {
     marginTop: 10,
     fontSize: 16,
-    color: '#666',
+    color: "#666",
   },
   safeArea: {
     flex: 1,
-    backgroundColor: '#F5F7FA',
+    backgroundColor: "#F5F7FA",
   },
   container: {
     flex: 1,
@@ -206,9 +216,9 @@ const styles = StyleSheet.create({
   },
   headerContent: {
     flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
     paddingHorizontal: 20,
     paddingTop: 40,
   },
@@ -216,14 +226,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   smallGreeting: {
-    color: 'white',
+    color: "white",
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   greeting: {
-    color: 'white',
+    color: "white",
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginTop: 4,
   },
   logoutButton: {
@@ -236,31 +246,31 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   topSection: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: 20,
     marginTop: -20,
     marginBottom: 20,
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
     zIndex: 2,
     height: 60,
   },
   searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'white',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "white",
     paddingHorizontal: 15,
     borderRadius: 15,
     elevation: 4,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 2,
     },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    width: '65%',
+    width: "65%",
     height: 45,
     marginTop: 25,
   },
@@ -270,14 +280,14 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 16,
-    color: '#333',
+    color: "#333",
   },
   userInfoBox: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 10,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 2,
@@ -285,42 +295,42 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 3,
-    alignItems: 'center',
-    width: '30%',
+    alignItems: "center",
+    width: "30%",
     marginTop: 25,
   },
   userRole: {
     fontSize: 14,
-    fontWeight: 'bold',
-    color: '#21588E',
+    fontWeight: "bold",
+    color: "#21588E",
   },
   userSubtitle: {
     fontSize: 12,
-    color: '#666',
+    color: "#666",
   },
   servicesSection: {
     paddingHorizontal: 20,
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#333",
     marginBottom: 15,
   },
   gridContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
   },
   gridItem: {
-    backgroundColor: 'white',
-    width: '48%',
+    backgroundColor: "white",
+    width: "48%",
     paddingVertical: 20,
     paddingHorizontal: 10,
     borderRadius: 10,
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 15,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 2,
@@ -332,8 +342,8 @@ const styles = StyleSheet.create({
   gridItemText: {
     marginTop: 10,
     fontSize: 16,
-    fontWeight: '500',
-    color: '#333',
+    fontWeight: "500",
+    color: "#333",
   },
   appointmentsContainer: {
     marginTop: 20,
@@ -341,8 +351,8 @@ const styles = StyleSheet.create({
   },
   appointmentsTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#333",
     marginBottom: 15,
   },
   appointmentsList: {
@@ -357,10 +367,10 @@ const styles = StyleSheet.create({
   },
   patientName: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 5,
   },
   appointmentTime: {
     fontSize: 14,
   },
-});
+})

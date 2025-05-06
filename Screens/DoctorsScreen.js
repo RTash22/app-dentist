@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Modal, TextInput, Alert, ScrollView, ActivityIndicator } from 'react-native';
 import { useAppContext } from '../context/AppContext';
 
-export function DoctorsScreen({ navigation }) {
+export function DoctorsScreen({ navigation, isEmbedded = false }) {
   const { doctors, setDoctors, addDoctor, updateDoctor, deleteDoctor, userData } = useAppContext();
   const [modalVisible, setModalVisible] = useState(false);
   const [editingDoctor, setEditingDoctor] = useState(null);
@@ -34,7 +34,7 @@ export function DoctorsScreen({ navigation }) {
   useEffect(() => {
     if (userData) {
       // Si el usuario no es admin, redirigir a la pantalla principal
-      if (userData.rol !== 'admin') {
+      if (userData.rol !== 'admin' && !isEmbedded) {
         Alert.alert(
           'Acceso Restringido', 
           'Solo los administradores pueden acceder a esta sección.',
@@ -48,7 +48,7 @@ export function DoctorsScreen({ navigation }) {
         setIsAdmin(true);
       }
     }
-  }, [userData, navigation]);
+  }, [userData, navigation, isEmbedded]);
 
   // Cargar doctores desde la API al iniciar
   useEffect(() => {
@@ -386,7 +386,7 @@ export function DoctorsScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      {isAdmin && (
+      {isAdmin && !isEmbedded && (
         <TouchableOpacity 
           style={styles.addButton}
           onPress={() => {
